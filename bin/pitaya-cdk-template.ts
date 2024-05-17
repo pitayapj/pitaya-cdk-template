@@ -1,21 +1,31 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { PitayaCdkTemplateStack } from '../lib/pitaya-cdk-template-stack';
+import { BaseNetworkStack } from '../lib/base-network';
+import { StatefulResourceStack } from '../lib/stateful-resources';
+import { env } from '../lib/parameters/constants';
+import { resolveConfig } from '../lib/parameters/env-config';
 
 const app = new cdk.App();
-new PitayaCdkTemplateStack(app, 'PitayaCdkTemplateStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const deployEnv = app.node.tryGetContext("deployEnv");
+if (deployEnv == undefined)
+  throw new Error(`Please specify environment with context option. ex) cdk deploy -c deployEnv=dev`);
+if (deployEnv != "dev" || deployEnv != "stg" || deployEnv != "prod") throw new Error('Invalid environment.');
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+// Get config from .env.${deployEnv} files
+const config = resolveConfig(deployEnv);
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+// First, the base stack.
+const baseNetworkStack = new BaseNetworkStack(app, `${deployEnv}-BaseNetWork`, {
+  env: env,
+  deployEnv: deployEnv,
+  config
+});
+
+const statefulResourceStack = new StatefulResourceStack(app, `${deployEnv}-StatefulResource`, {
+  env: env,
+  deployEnv: deployEnv,
+  vpc: baseNetworkStack.vpc, //reference resource from difference stack can make resource interlock, so be careful!
+  //if config is needed, add it in the file 
 });
