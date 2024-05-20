@@ -1,5 +1,6 @@
 /**
- * 
+ * StateFULL resources
+ * Databases!
  */
 
 import * as cdk from 'aws-cdk-lib';
@@ -19,7 +20,7 @@ export class StatefulResourceStack extends cdk.Stack {
     super(scope, id, props);
     const { deployEnv, vpc } = props;
 
-    const databasePort = 35527;
+    const databasePort = 5432;
 
     const dbSecurityGroup = new cdk.aws_ec2.SecurityGroup(this, `${deployEnv}-db-sg`,{
         vpc: vpc,
@@ -41,7 +42,7 @@ export class StatefulResourceStack extends cdk.Stack {
             subnetType: cdk.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
         },
         allocatedStorage: 20,
-        instanceType: cdk.aws_ec2.InstanceType.of(cdk.aws_ec2.InstanceClass.BURSTABLE3, deployEnv == "prod" ? cdk.aws_ec2.InstanceSize.SMALL : cdk.aws_ec2.InstanceSize.MICRO ),
+        instanceType: cdk.aws_ec2.InstanceType.of(cdk.aws_ec2.InstanceClass.BURSTABLE3, deployEnv == "prod" ? cdk.aws_ec2.InstanceSize.MEDIUM : cdk.aws_ec2.InstanceSize.MICRO ),
         securityGroups: [dbSecurityGroup],
         credentials: cdk.aws_rds.Credentials.fromPassword(
             cdk.aws_ssm.StringParameter.fromStringParameterAttributes(this, "postGre-acc", { parameterName: `/${deployEnv}/db_username` }).stringValue,

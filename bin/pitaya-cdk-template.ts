@@ -30,8 +30,8 @@ const config = resolveConfig(deployEnv);
  * VPC itself should not be delete and should be available till the end of project life cycle.
  * Should be things that's free
  *  */ 
-const baseNetworkStack = new BaseNetworkStack(app, 'BaseNetWork', {
-  stackName: `${deployEnv}-BaseNetWork`,
+const baseNetworkStack = new BaseNetworkStack(app, 'BaseNetwork', {
+  stackName: `${deployEnv}-BaseNetwork`,
   env: env,
   deployEnv: deployEnv,
   config

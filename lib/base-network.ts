@@ -11,14 +11,14 @@ import { StackConfig } from './parameters/env-config';
 import { commonConstants } from '../lib/parameters/constants';
 
 
-interface BaseNetWorkProps extends cdk.StackProps {
+interface BaseNetworkProps extends cdk.StackProps {
   deployEnv: string;
   config: Readonly<StackConfig>;
 }
 
 export class BaseNetworkStack extends cdk.Stack {
   public readonly vpc: cdk.aws_ec2.Vpc;
-  constructor(scope: Construct, id: string, props: BaseNetWorkProps) {
+  constructor(scope: Construct, id: string, props: BaseNetworkProps) {
     super(scope, id, props);
     const { deployEnv, config } = props;
 
