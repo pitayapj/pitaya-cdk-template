@@ -2,9 +2,11 @@
 Pitaya CDK template 😃 (in Typescript)
 
 ## Tables of contents
-- [Background] (#background)
-- [Requirements] (#requirements)
-
+- [Background](#background)
+- [Requirements](#requirements)
+- [Stacks structure](#stacks-structure)
+- [Files structure](#files-structure-and-its-meaning)
+- [Commands](#commands)
 ## Background
 I don't want to initiate a blank CDK project anymore. So this is what I created.
 

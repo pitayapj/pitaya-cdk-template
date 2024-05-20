@@ -30,6 +30,6 @@ export class StatelessResourceStack extends cdk.Stack {
         environment: {
           "env": deployEnv
         },
-      });
+    });
   }
 }
