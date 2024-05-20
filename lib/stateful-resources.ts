@@ -1,8 +1,5 @@
 /**
- * -> Things declared in here will be references by other stacks!
- * -> NOT RECOMMENDED for declaring resources that changes regularly!
- * -> Things declared in here should be free, stateless, not delete resources.
- * For ex: VPC, a few SG, a EIP for NAT Gateway
+ * 
  */
 
 import * as cdk from 'aws-cdk-lib';

@@ -10,7 +10,7 @@ export interface StackConfig {
 //Get parameter from .env file, if value not exist, get default's value
 
 export const resolveConfig = (deployEnv: string): StackConfig => {
-    dotenv.config({ path: path.resolve(__dirname, `../.env.${deployEnv}`) });
+    dotenv.config({ path: path.resolve(__dirname, `../../.env.${deployEnv}`) });
 
     return {
         domainName: process.env.DOMAIN_NAME || '',

@@ -22,9 +22,9 @@ export class BaseNetworkStack extends cdk.Stack {
     super(scope, id, props);
     const { deployEnv, config } = props;
 
-    const eipAddress = new cdk.aws_ec2.CfnEIP(this, `${deployEnv}IpAddress`,{
+    // const eipAddress = new cdk.aws_ec2.CfnEIP(this, `${deployEnv}-EIpAddress`,{
       
-    });
+    // });
 
     this.vpc = new cdk.aws_ec2.Vpc(this, `${deployEnv}-${commonConstants.project}-vpc`, {
       vpcName: `${deployEnv}-${commonConstants.project}-vpc`,
@@ -42,8 +42,8 @@ export class BaseNetworkStack extends cdk.Stack {
           cidrMask: 24,
         },
       ],
-      natGateways: 1,
-      natGatewayProvider: cdk.aws_ec2.NatProvider.gateway({ eipAllocationIds: [eipAddress.attrAllocationId] }),
+      natGateways: 0,
+      // natGatewayProvider: cdk.aws_ec2.NatProvider.gateway({ eipAllocationIds: [eipAddress.attrAllocationId] }),
     });
   }
 }
