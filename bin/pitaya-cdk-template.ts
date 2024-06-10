@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
+import { App } from 'aws-cdk-lib';
 import { BaseNetworkStack } from '../lib/base-network';
 import { StatefulResourceStack } from '../lib/stateful-resources';
 import { StatelessResourceStack } from '../lib/stateless-resources';
 import { env } from '../lib/parameters/constants';
 import { resolveConfig } from '../lib/parameters/env-config';
 
-const app = new cdk.App();
+const app = new App();
 
 const deployEnv = app.node.tryGetContext("deployEnv");
 if (deployEnv == undefined)
