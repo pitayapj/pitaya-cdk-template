@@ -1,14 +1,120 @@
-# Welcome to your CDK TypeScript project
+# CDK Template
+Pitaya CDK template 😃 (in Typescript)
 
-This is a blank project for CDK development with TypeScript.
+## Tables of contents
+- [Background](#background)
+- [Requirements](#requirements)
+- [Stacks structure](#stacks-structure)
+- [Files structure](#files-structure-and-its-meaning)
+- [Commands](#commands)
+- [Future improvements](#future-improvements)
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Background
+I don't want to initiate a blank CDK project anymore. So this is what I created.
 
-## Useful commands
+You can use this to deploy infra from your machine, or even with a CDK pipeline with just a little twist!
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+## Requirements
+Of course a PC (I'm using MacOS, so installation guide gonna be for MacOS)
+
+1. AWS CLI
+
+    https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+2. npm
+3. CDK Typescript
+    ```sh
+    npm -g install typescript    
+    ```
+4. AWS Credential (I will use AWS SSO Account with --profile flag)
+
+## Stacks structure
+The template include 3 major stacks, and will be (should be deploy in exact sequent):
+- Base Network
+- Stateful Resources
+- Stateless Resources
+
+Optional stack:
+- Non Production
+
+This is just an example stack. In this stack I created automation to shut down resources temporary outside business hour (not meant to use in production)
+
+You can deploy Stateful or Stateless independently, but they will still be depended on BaseNetwork stack .<bR>
+In other word, BaseNetwork will be created no matter which stack you create first.
+
+You can extend to more subsequent stacks. But the less stacks the better.
+
+**⚠️⚠️⚠️Please also keep in mind that this stack will be deploy in Tokyo Region as default⚠️⚠️⚠️**<br>
+Set different region in .env file if needed to.
+
+A visualization of stack order and its dependency:
+
+![stacks](/stacks.png)
+## Files structure and its meaning
+```sh
+pitaya-cdk-template
+├── assets
+│   └── lambda-code.py #example lambda function's code
+├── bin
+│   └── pitaya-cdk-template.ts # entry point, stacks will be loaded here
+├── lib #stacks' definition folder
+│   ├── parameters 
+│   │   ├── constants.ts #constants through out project
+│   │   └── env-config.ts #load parameter from .env.${deployEnv} files below
+│   ├── base-network.ts #BaseNetwork Stack
+│   ├── non-production.ts #Non Production Stack
+│   ├── stateful-resources.ts #Stateful Stack
+│   └── stateless-resources.ts #Stateless Stack
+├── .env.dev #parameters for dev environment
+├── .env.stg #parameters for stg environment
+└── .env.prod #parameters for prod environment
+```
+
+## Commands
+You need to specify which environment to deploy with context **deployEnv** and supply it on every cdk command. <br> 
+
+`-c deployEnv=dev`
+
+### Git clone and bootstrap cdk to your AWS account
+```sh
+# Clone project
+git clone git@github.com:long2205/pitaya-cdk-template.git
+```
+
+Register account ID (and default region) in lib/constants.ts
+```sh
+# Bootstrap to your AWS
+cdk bootstrap -c deployEnv=dev --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
+```
+
+### Deploy stacks
+Stacks will be deploy in sequential order.
+
+Deploy commands with development environment:
+```sh
+# Deploy Base Network
+cdk deploy -c deployEnv=dev --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 BaseNetwork
+
+# Deploy Stateless resources
+cdk deploy -c deployEnv=dev --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 StatelessResource
+# Stateless stack is depended on BaseNetwork Stack. Hence when deploy, it also deploys/check changes BaseNetwork Stack. The same with Stateful Stack
+```
+
+### Delete stacks
+Sometimes, you need to re-create stack. Or your business is gone and you need to delete it. 
+
+Deleting stacks should be delete by later-most order.
+
+Which means the latest stack should be delete first, then the upmost BaseNetwork stack will be delete.
+
+```sh
+cdk destroy -c deployEnv=dev --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 StatelessResource
+
+cdk deploy -c deployEnv=dev --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 BaseNetwork
+# If you only run BaseNetwork delete command, all stacks will be delete, not just BaseNetwork stack
+```
+
+## Future improvements
+- Wrapped all the stacks into a [CDK Pipeline](https://docs.aws.amazon.com/cdk/v2/guide/cdk_pipeline.html) 
+
+(This is the main reason I put parameters into .env file, but for now I still prefer control from local machine)
+- Introduce [cdk-nag](https://github.com/cdklabs/cdk-nag)
