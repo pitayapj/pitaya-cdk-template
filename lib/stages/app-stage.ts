@@ -18,16 +18,17 @@ import { StatefulResourceStack } from '../stacks/stateful-resources';
 import { StatelessResourceStack } from '../stacks/stateless-resources';
 // import { NonProductionStack } from '../stacks/non-production';
 
-interface DevStageProps extends StageProps {
-
+interface AppStageProps extends StageProps {
+	deployEnv: "dev" | "stg" | "prod",
+	infraStatus: "on" | "off",
 }
 
-export class DevelopmentStage extends Stage {
-	constructor(scope: Construct, id: string, props: DevStageProps){
+export class AppStage extends Stage {
+	constructor(scope: Construct, id: string, props: AppStageProps){
 		super(scope, id, props)
 
 		//Stage prefix
-		const deployEnv = "dev";
+		const { deployEnv } = props;
 
 		// Load config from .env.${deployEnv} files
 		const config = resolveConfig(deployEnv);
@@ -47,6 +48,7 @@ export class DevelopmentStage extends Stage {
 			stackName: `${deployEnv}-BaseNetwork-${commonConstants.project}`,
 			deployEnv: deployEnv,
 			config,
+			terminationProtection: deployEnv == "prod" ? true : false,
 		});
 
 		/**
@@ -59,6 +61,7 @@ export class DevelopmentStage extends Stage {
 			stackName: `${deployEnv}-StatefulResource-${commonConstants.project}`,
 			deployEnv: deployEnv,
 			vpc: baseNetworkStack.vpc, //reference resource from difference stack can make stack interlock, so be careful!
+			terminationProtection: deployEnv == "prod" ? true : false,
 		});
 		statefulResourceStack.addDependency(baseNetworkStack);
 
@@ -78,6 +81,7 @@ export class DevelopmentStage extends Stage {
 			vpc: baseNetworkStack.vpc,
 			hostZone: baseNetworkStack.hostZone,
 			config: config,
+			terminationProtection: deployEnv == "prod" ? true : false,
 		});
 		statelessResourceStack.addDependency(baseNetworkStack);
 

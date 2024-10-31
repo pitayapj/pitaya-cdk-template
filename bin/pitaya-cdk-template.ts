@@ -3,23 +3,29 @@ import 'source-map-support/register';
 import { App, Tags } from 'aws-cdk-lib';
 
 import { env } from '../lib/parameters/constants';
-import { DevelopmentStage } from '../lib/stages/dev';
-import { ProductionStage } from '../lib/stages/prod';
+import { AppStage } from '../lib/stages/app-stage';
 
 const app = new App();
 
-// const deployEnv = app.node.tryGetContext("deployEnv");
-// if (deployEnv == undefined)
-//   throw new Error(`Please specify environment with context option. ex) cdk deploy -c deployEnv=dev`);
-// if (deployEnv !== "dev" && deployEnv !== "stg" && deployEnv !== "prod")
-//   throw new Error('Invalid environment. Only accept dev, stg or prod');
+const infraStatus = app.node.tryGetContext("infraStatus") != undefined ? app.node.tryGetContext("infraStatus") : "on"; 
+if (infraStatus !== "on" && infraStatus !== "off") 
+  throw new Error('Invalid infra status. Only accept on or off');
 
-const devStage = new DevelopmentStage(app, "Development", {
+// All environments' prefix. This will be supply to resources' name.
+const devEnv = "dev";
+const stgEnv = "stg";
+const prodEnv = "prod";
+
+const devStage = new AppStage(app, "Development", {
   env: env,
+  deployEnv: devEnv,
+  infraStatus: infraStatus
 });
-Tags.of(devStage).add("env","dev");
+Tags.of(devStage).add("env", devEnv);
 
-const prodStage = new ProductionStage(app, "Production", {
-  env: env
+const prodStage = new AppStage(app, "Production", {
+  env: env,
+  deployEnv: prodEnv,
+  infraStatus: "on"
 });
-Tags.of(devStage).add("env","prod");
+Tags.of(prodStage).add("env", prodEnv);

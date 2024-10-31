@@ -44,11 +44,11 @@ In other word, BaseNetwork will be created no matter which stack you create firs
 You can extend to more subsequent stacks. But the less stacks the better.
 
 ## Stages 
-Stage can be consider a sub set of CDK project. I define it's a development environment.
-
-Which mean each stage represent an environment of our project.
+Stage can be consider a sub set of CDK project. A combination of stack(s) in a CDK application.
 
 Each stage can have just one or multiple stacks, which will be define in each stage's file.
+
+For our project, every environments have the same stack(s), so we can define just one single stage and multiply it for each environment.
 
 **⚠️⚠️⚠️Please also keep in mind that this stack will be deploy in Tokyo Region as default⚠️⚠️⚠️**<br>
 Set different region in .env file if needed to.
@@ -73,8 +73,7 @@ pitaya-cdk-template
 │   │   ├── stateful-resources.ts #Stateful Stack
 │   │   └── stateless-resources.ts #Stateless Stack
 │   └── stages #deployment stages folder
-│       ├── dev.ts #Development Stage
-│       └── prod.ts #Production Stage
+│       └── app-stage.ts #application stage
 ├── .env.dev #parameters for dev environment
 ├── .env.stg #parameters for stg environment
 └── .env.prod #parameters for prod environment
