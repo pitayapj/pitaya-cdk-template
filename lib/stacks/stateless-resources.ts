@@ -28,8 +28,8 @@ import {
   aws_cloudfront_origins as cloudfront_origins,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { StackConfig } from './parameters/env-config';
-import { commonConstants } from '../lib/parameters/constants';
+import { StackConfig } from '../parameters/env-config';
+import { commonConstants } from '../parameters/constants';
 import * as path from 'path';
 
 

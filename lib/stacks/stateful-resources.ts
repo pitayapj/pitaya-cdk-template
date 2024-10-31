@@ -12,7 +12,7 @@ import {
   aws_ssm as ssm,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { commonConstants } from '../lib/parameters/constants';
+import { commonConstants } from '../parameters/constants';
 
 
 interface StatefulResourceProps extends StackProps {

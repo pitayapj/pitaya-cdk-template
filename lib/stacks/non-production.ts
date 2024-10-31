@@ -15,7 +15,7 @@ import {
     StackProps,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { commonConstants } from './parameters/constants';
+import { commonConstants } from '../parameters/constants';
 
 interface NonProductionProps extends StackProps {
     deployEnv: "dev" | "stg",

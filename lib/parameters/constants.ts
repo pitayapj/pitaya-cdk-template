@@ -6,12 +6,12 @@
  */
 
 export const commonConstants = {
-    project: "template",
-    codestarConnectionARN: "",
-    organizationSharedParameterARN: ""
+	project: "template",
+	codestarConnectionARN: "",
+	organizationSharedParameterARN: ""
 }
 
 export const env =  {
-    account: '01234567890', 
-    region: 'ap-northeast-1' 
+	account: '01234567890', 
+	region: 'ap-northeast-1' 
 }

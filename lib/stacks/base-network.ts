@@ -12,8 +12,8 @@ import {
   aws_route53 as route53,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { StackConfig } from './parameters/env-config';
-import { commonConstants } from '../lib/parameters/constants';
+import { StackConfig } from '../parameters/env-config';
+import { commonConstants } from '../parameters/constants';
 
 
 interface BaseNetworkProps extends StackProps {
