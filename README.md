@@ -128,7 +128,7 @@ cdk destroy "Development/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭
 ```
 
 ## Future improvements
-- Wrapped all the stages into a [CDK Pipeline](https://docs.aws.amazon.com/cdk/v2/guide/cdk_pipeline.html) 
+- Wrapped all the stages into a [CDK Pipeline](https://docs.aws.amazon.com/cdk/v2/guide/cdk_pipeline.html#cdk_pipeline_stages) 
+Can be easily done now since you only need to add a stage into CDK pipeline.
 
-(This is the main reason I put parameters into .env file, but for now I still prefer control from local machine)
 - Introduce [cdk-nag](https://github.com/cdklabs/cdk-nag)
