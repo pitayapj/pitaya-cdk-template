@@ -11,7 +11,6 @@ import {
   } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { resolveConfig } from '../parameters/env-config';
-import { commonConstants } from '../parameters/constants';
 //Import stack(s)
 import { BaseNetworkStack } from '../stacks/base-network';
 import { StatefulResourceStack } from '../stacks/stateful-resources';
@@ -44,8 +43,7 @@ export class AppStage extends Stage {
 		 * VPC itself should not be delete and should be available till the end of project life cycle.
 		 * Should be things that's free
 		 *  */
-		const baseNetworkStack = new BaseNetworkStack(this, 'BaseNetwork', {
-			stackName: `${deployEnv}-BaseNetwork-${commonConstants.project}`,
+		const baseNetworkStack = new BaseNetworkStack(this, 'base-network', {
 			deployEnv: deployEnv,
 			config,
 			terminationProtection: deployEnv == "prod" ? true : false,
@@ -57,8 +55,7 @@ export class AppStage extends Stage {
 		 * Most of the time should just be AWS RDS databases.
 		 * Delete protection should be on for production and off otherwise.
 		 *  */
-		const statefulResourceStack = new StatefulResourceStack(this, 'StatefulResource', {
-			stackName: `${deployEnv}-StatefulResource-${commonConstants.project}`,
+		const statefulResourceStack = new StatefulResourceStack(this, 'stateful-resources', {
 			deployEnv: deployEnv,
 			vpc: baseNetworkStack.vpc, //reference resource from difference stack can make stack interlock, so be careful!
 			terminationProtection: deployEnv == "prod" ? true : false,
@@ -75,8 +72,7 @@ export class AppStage extends Stage {
 		 * Load Balancer, EC2, ECS, Lambda, Code Pipeline, etc..
 		 * If you have too many lambda functions, you can write in into a difference file.
 		 *  */
-		const statelessResourceStack = new StatelessResourceStack(this, 'StatelessResource', {
-			stackName: `${deployEnv}-StatelessResource-${commonConstants.project}`,
+		const statelessResourceStack = new StatelessResourceStack(this, 'stateless-resources', {
 			deployEnv: deployEnv,
 			vpc: baseNetworkStack.vpc,
 			hostZone: baseNetworkStack.hostZone,
@@ -94,7 +90,6 @@ export class AppStage extends Stage {
 		 * This stack will be depended on stateless and stateful stacks so when you need to delete stacks, delete this first.
 		 */
 		// const nonProductionStack = new NonProductionStack(this, 'NonProduction', {
-		//   stackName: `${deployEnv}-NonProduction-${commonConstants.project}`,
 		//   deployEnv: deployEnv,
 		//   cluster: statelessResourceStack.cluster,
 		//   backendService: statelessResourceStack.backendService,

@@ -99,13 +99,13 @@ Stacks will be deploy in sequential order.
 Deploy commands with development environment:
 ```sh
 # Deploy every stacks of Development stage
-cdk deploy "Development/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
+cdk deploy "dev/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
 
 # Deploy Base Network
-cdk deploy Development/BaseNetwork --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
+cdk deploy dev/base-network --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
 
 # Deploy Stateless resources
-cdk deploy Development/StatelessResource --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
+cdk deploy dev/stateless-resources --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
 # Stateless stack is depended on BaseNetwork Stack. Hence when deploy, it also deploys/check changes of BaseNetwork Stack. Same thing happen with Stateful Stack.
 ```
 
@@ -117,13 +117,13 @@ Deleting stacks should be delete by later-most order.
 Which means the latest stack should be delete first, then the upmost BaseNetwork stack will be delete.
 
 ```sh
-cdk destroy Development/StatelessResource --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
+cdk destroy dev/stateless-resources --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
 
-cdk destroy Development/BaseNetwork --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
+cdk destroy dev/base-network --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
 # If you only run BaseNetwork delete command, all stacks will be delete, not just BaseNetwork stack
 
 # This command will delete everything in Development stage, latest stack to oldest.
-cdk destroy "Development/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
+cdk destroy "dev/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦 
 ```
 
 ## Future improvements

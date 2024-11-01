@@ -16,14 +16,14 @@ const devEnv = "dev";
 const stgEnv = "stg";
 const prodEnv = "prod";
 
-const devStage = new AppStage(app, "Development", {
+const devStage = new AppStage(app, devEnv, {
   env: env,
   deployEnv: devEnv,
   infraStatus: infraStatus
 });
 Tags.of(devStage).add("env", devEnv);
 
-const prodStage = new AppStage(app, "Production", {
+const prodStage = new AppStage(app, prodEnv, {
   env: env,
   deployEnv: prodEnv,
   infraStatus: "on"
