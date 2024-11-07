@@ -28,7 +28,7 @@ export class BaseNetworkStack extends Stack {
     super(scope, id, props);
     const { deployEnv, config } = props;
 
-    const eipAddress = new ec2.CfnEIP(this, `${deployEnv}-eip-address`);
+    const eipAllocationIds = this.createEipAllocationIds(deployEnv);
 
     this.vpc = new ec2.Vpc(this, `${deployEnv}-${commonConstants.project}-vpc`, {
       vpcName: `${deployEnv}-${commonConstants.project}-vpc`,
@@ -46,12 +46,22 @@ export class BaseNetworkStack extends Stack {
           cidrMask: 24,
         },
       ],
-      natGateways: deployEnv == "prod" ? 2 : 1,
-      natGatewayProvider: ec2.NatProvider.gateway({ eipAllocationIds: [eipAddress.attrAllocationId] }),
+      natGateways: eipAllocationIds.length,
+      natGatewayProvider: ec2.NatProvider.gateway({ eipAllocationIds: eipAllocationIds }),
     });
 
     this.hostZone = new route53.HostedZone(this, `${deployEnv}-${commonConstants.project}-host-zone`, {
       zoneName: config.domainName
     });
   }
+
+  private createEipAllocationIds(deployEnv: string): string[] {
+    const eipAddress1 = new ec2.CfnEIP(this, `${deployEnv}-eip-1-address`);
+    if (deployEnv === "prod") {
+      const eipAddress2 = new ec2.CfnEIP(this, `${deployEnv}-eip-2-address`);
+      return [eipAddress1.attrAllocationId, eipAddress2.attrAllocationId];
+    } 
+    return [eipAddress1.attrAllocationId];
+  }
+
 }

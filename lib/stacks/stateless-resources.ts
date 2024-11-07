@@ -394,7 +394,7 @@ export class StatelessResourceStack extends Stack {
     /**Lambda function */
     const invalidationLambda = new lambda.Function(this, `${deployEnv}-${commonConstants.project}-invalidate-lambda`, {
       functionName: `cloudfront-invalidation-${deployEnv}`,
-      code: lambda.Code.fromAsset(path.join(__dirname, "../assets")),
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../assets")),
       runtime: lambda.Runtime.PYTHON_3_12,
       handler: `invalidation.lambda_handler`,
       environment: {

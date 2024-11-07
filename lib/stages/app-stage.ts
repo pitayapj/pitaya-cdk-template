@@ -6,9 +6,9 @@
  */
 
 import {
-    Stage,
-    StageProps,
-  } from 'aws-cdk-lib';
+	Stage,
+	StageProps,
+} from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { resolveConfig } from '../parameters/env-config';
 //Import stack(s)
@@ -23,7 +23,7 @@ interface AppStageProps extends StageProps {
 }
 
 export class AppStage extends Stage {
-	constructor(scope: Construct, id: string, props: AppStageProps){
+	constructor(scope: Construct, id: string, props: AppStageProps) {
 		super(scope, id, props)
 
 		//Stage prefix
@@ -34,7 +34,7 @@ export class AppStage extends Stage {
 
 		// Some parameter might need user to define, in that case uncomment below code
 		if (!config.domainName) {
-			throw new Error(`Missing required DOMAIN_NAME in .env file, please include it in .env.${deployEnv} file.` );
+			throw new Error(`Missing required DOMAIN_NAME in .env file, please include it in .env.${deployEnv} file.`);
 		}
 		/**
 		 * First, the base network stack

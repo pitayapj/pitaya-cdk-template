@@ -16,6 +16,9 @@ const devEnv = "dev";
 const stgEnv = "stg";
 const prodEnv = "prod";
 
+/**
+ * Development Environment
+ */
 const devStage = new AppStage(app, devEnv, {
   env: env,
   deployEnv: devEnv,
@@ -23,6 +26,10 @@ const devStage = new AppStage(app, devEnv, {
 });
 Tags.of(devStage).add("env", devEnv);
 
+
+/**
+ * Production Environment
+ */
 const prodStage = new AppStage(app, prodEnv, {
   env: env,
   deployEnv: prodEnv,
