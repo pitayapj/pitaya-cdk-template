@@ -10,7 +10,6 @@ import {
 	StageProps,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { resolveConfig } from '../parameters/env-config';
 //Import stack(s)
 import { BaseNetworkStack } from '../stacks/base-network';
 import { StatefulResourceStack } from '../stacks/stateful-resources';
@@ -29,13 +28,6 @@ export class AppStage extends Stage {
 		//Stage prefix
 		const { deployEnv } = props;
 
-		// Load config from .env.${deployEnv} files
-		const config = resolveConfig(deployEnv);
-
-		// Some parameter might need user to define, in that case uncomment below code
-		if (!config.domainName) {
-			throw new Error(`Missing required DOMAIN_NAME in .env file, please include it in .env.${deployEnv} file.`);
-		}
 		/**
 		 * First, the base network stack
 		 * Base network included VPC and its config.
@@ -45,7 +37,6 @@ export class AppStage extends Stage {
 		 *  */
 		const baseNetworkStack = new BaseNetworkStack(this, 'base-network', {
 			deployEnv: deployEnv,
-			config,
 			terminationProtection: deployEnv == "prod" ? true : false,
 		});
 
@@ -76,7 +67,6 @@ export class AppStage extends Stage {
 			deployEnv: deployEnv,
 			vpc: baseNetworkStack.vpc,
 			hostZone: baseNetworkStack.hostZone,
-			config: config,
 			terminationProtection: deployEnv == "prod" ? true : false,
 		});
 		statelessResourceStack.addDependency(baseNetworkStack);

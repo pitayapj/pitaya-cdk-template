@@ -28,22 +28,22 @@ import {
   aws_cloudfront_origins as cloudfront_origins,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { StackConfig } from '../parameters/env-config';
-import { commonConstants } from '../parameters/constants';
+import { envConstants, commonConstants } from '../parameters/constants';
+import { resolveConfig } from '../parameters/env-config';
 import * as path from 'path';
 
 
 interface StatelessResourceProps extends StackProps {
-  deployEnv: string;
+  deployEnv: "dev" | "stg" |"prod",
   vpc: ec2.Vpc;
   hostZone: route53.HostedZone;
-  config: Readonly<StackConfig>;
 }
 
 export class StatelessResourceStack extends Stack {
   constructor(scope: Construct, id: string, props: StatelessResourceProps) {
     super(scope, id, props);
-    const { deployEnv, vpc, config, hostZone } = props;
+    const { deployEnv, vpc, hostZone } = props;
+    const config = resolveConfig();
     /**
      * Log bucket (in early stage of development, maybe it's best to set DESTROY RemovalPolicy)
      */
@@ -59,14 +59,14 @@ export class StatelessResourceStack extends Stack {
      * So, we gonna create it with a deprecated function.
      */
     const lbCert = new certificatemanager.Certificate(this, `${deployEnv}-${commonConstants.project}-cert`, {
-      domainName: config.domainName,
-      subjectAlternativeNames: [`*.${config.domainName}`],
+      domainName: envConstants[deployEnv].domain,
+      subjectAlternativeNames: [`*.${envConstants[deployEnv].domain}`],
       validation: certificatemanager.CertificateValidation.fromDns(hostZone),
     });
 
     const cloudfrontCert = new certificatemanager.DnsValidatedCertificate(this, `${deployEnv}-${commonConstants.project}-cloudfront-cert`, {
-      domainName: config.domainName,
-      subjectAlternativeNames: [`api.${config.domainName}`],
+      domainName: envConstants[deployEnv].domain,
+      subjectAlternativeNames: [`api.${envConstants[deployEnv].domain}`],
       hostedZone: hostZone,
       // the properties below are set for validation in us-east-1
       region: 'us-east-1',
@@ -178,7 +178,7 @@ export class StatelessResourceStack extends Stack {
       port: 8888,
       protocol: lbv2.ApplicationProtocol.HTTP,
       conditions: [
-        lbv2.ListenerCondition.hostHeaders([`api.${config.domainName}`]),
+        lbv2.ListenerCondition.hostHeaders([`api.${envConstants[deployEnv].domain}`]),
         // cdk.aws_elasticloadbalancingv2.ListenerCondition.pathPatterns(["/api/*"]),
       ],
       targets: [apiService],
@@ -207,7 +207,7 @@ export class StatelessResourceStack extends Stack {
         accessControlAllowCredentials: false,
         accessControlAllowHeaders: ['Authorization', '*'], // * alone does NOT include Authorization header. Need to write it specifically
         accessControlAllowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'HEAD'],
-        accessControlAllowOrigins: [`https://${config.domainName}`],
+        accessControlAllowOrigins: [`https://${envConstants[deployEnv].domain}`],
         // accessControlExposeHeaders: [],
         accessControlMaxAge: Duration.seconds(600),
         originOverride: true,
@@ -233,7 +233,7 @@ export class StatelessResourceStack extends Stack {
       logBucket: loggingBucket,
       logFilePrefix: `cloudfront/${deployEnv}/`,
       certificate: cloudfrontCert,
-      domainNames: [`api.${config.domainName}`],
+      domainNames: [`api.${envConstants[deployEnv].domain}`],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_200, //include Japan but not all
       // Custom for Frontend Distribution
       // If frontend is a React SPA app hosting in S3, we will needed in including below code (to change behavior when user reload page)
@@ -250,7 +250,7 @@ export class StatelessResourceStack extends Stack {
     new route53.ARecord(this, `api-record-${deployEnv}`, {
       zone: hostZone,
       target: route53.RecordTarget.fromAlias(new route53_targets.CloudFrontTarget(backendCloudfront)),
-      recordName: `api.${config.domainName}`,
+      recordName: `api.${envConstants[deployEnv].domain}`,
     });
 
     /**
@@ -276,10 +276,10 @@ export class StatelessResourceStack extends Stack {
     const sourceActionApi = new codepipeline_actions.CodeStarConnectionsSourceAction({
       actionName: "GithubSource",
       owner: "long2205",
-      branch: config.githubBranch,
+      branch: envConstants[deployEnv].codeBranch,
       repo: "ecs-example-api-repo",
       output: sourceOutputApi,
-      connectionArn: commonConstants.codestarConnectionARN
+      connectionArn: config.githubConnection
     });
     //Build
     const buildOutputApi = new codepipeline.Artifact();

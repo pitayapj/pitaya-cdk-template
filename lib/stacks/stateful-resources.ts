@@ -16,9 +16,8 @@ import { commonConstants } from '../parameters/constants';
 
 
 interface StatefulResourceProps extends StackProps {
-  deployEnv: string;
+  deployEnv: "dev" | "stg" |"prod",
   vpc: ec2.Vpc;
-  //config: Readonly<StackConfig>;
 }
 
 export class StatefulResourceStack extends Stack {

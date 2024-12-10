@@ -12,13 +12,11 @@ import {
   aws_route53 as route53,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { StackConfig } from '../parameters/env-config';
-import { commonConstants } from '../parameters/constants';
+import { envConstants, commonConstants } from '../parameters/constants';
 
 
 interface BaseNetworkProps extends StackProps {
-  deployEnv: string;
-  config: Readonly<StackConfig>;
+  deployEnv: "dev" | "stg" |"prod",
 }
 
 export class BaseNetworkStack extends Stack {
@@ -26,13 +24,13 @@ export class BaseNetworkStack extends Stack {
   public readonly hostZone: route53.HostedZone;
   constructor(scope: Construct, id: string, props: BaseNetworkProps) {
     super(scope, id, props);
-    const { deployEnv, config } = props;
+    const { deployEnv } = props;
 
     const eipAllocationIds = this.createEipAllocationIds(deployEnv);
 
     this.vpc = new ec2.Vpc(this, `${deployEnv}-${commonConstants.project}-vpc`, {
       vpcName: `${deployEnv}-${commonConstants.project}-vpc`,
-      ipAddresses: ec2.IpAddresses.cidr(config.cidrBlock),
+      ipAddresses: ec2.IpAddresses.cidr(envConstants[deployEnv].cidr),
       maxAzs: 2,
       subnetConfiguration: [
         {
@@ -51,7 +49,7 @@ export class BaseNetworkStack extends Stack {
     });
 
     this.hostZone = new route53.HostedZone(this, `${deployEnv}-${commonConstants.project}-host-zone`, {
-      zoneName: config.domainName
+      zoneName: envConstants[deployEnv].domain
     });
   }
 

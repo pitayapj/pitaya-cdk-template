@@ -7,11 +7,22 @@
 
 export const commonConstants = {
 	project: "template",
-	codestarConnectionARN: "",
-	organizationSharedParameterARN: ""
 }
 
-export const env =  {
-	account: '01234567890', 
-	region: 'ap-northeast-1' 
+export const envConstants = {
+	"dev": {
+			cidr: "10.0.0.0/16",
+			domain: "dev.template.com",
+			codeBranch: "develop"
+	},
+	"stg": {
+			cidr: "10.1.0.0/16",
+			domain: "stg.template.com",
+			codeBranch: "staging"
+	},
+	"prod": {
+			cidr: "10.2.0.0/16",
+			domain: "template.com",
+			codeBranch: "main"
+	}
 }

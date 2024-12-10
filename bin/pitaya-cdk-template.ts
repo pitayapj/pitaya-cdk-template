@@ -2,10 +2,12 @@
 import 'source-map-support/register';
 import { App, Tags } from 'aws-cdk-lib';
 
-import { env } from '../lib/parameters/constants';
+import { resolveConfig } from '../lib/parameters/env-config';
 import { AppStage } from '../lib/stages/app-stage';
 
 const app = new App();
+
+const config = resolveConfig();
 
 const infraStatus = app.node.tryGetContext("infraStatus") != undefined ? app.node.tryGetContext("infraStatus") : "on"; 
 if (infraStatus !== "on" && infraStatus !== "off") 
@@ -20,7 +22,7 @@ const prodEnv = "prod";
  * Development Environment
  */
 const devStage = new AppStage(app, devEnv, {
-  env: env,
+  env: {account: config.awsAccount, region: config.region},
   deployEnv: devEnv,
   infraStatus: infraStatus
 });
@@ -31,7 +33,7 @@ Tags.of(devStage).add("env", devEnv);
  * Production Environment
  */
 const prodStage = new AppStage(app, prodEnv, {
-  env: env,
+  env: {account: config.awsAccount, region: config.region},
   deployEnv: prodEnv,
   infraStatus: "on"
 });
