@@ -15,7 +15,7 @@ Pitaya CDK template 😃 (in Typescript)
 
 I don't want to initiate a blank CDK project anymore. So this is what I created.
 
-You can use this to deploy infra from your machine, or even with a CDK pipeline with just a little twist!
+🚨 Wrapped everything inside CDK Pipeline, will be teh default from now on. (README manual will be change later)
 
 ## Requirements
 

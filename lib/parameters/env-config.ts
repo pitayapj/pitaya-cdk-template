@@ -6,6 +6,7 @@ export interface CDKConfig {
     awsAccount: string,
     githubConnection: string,
     region: string,
+    infraRepo: string,
 }
 
 //Get parameter from .env file, if value not exist, get default's value
@@ -16,6 +17,7 @@ export const resolveConfig = (): CDKConfig => {
     return {
         awsAccount: process.env.ACCOUNT_ID || '',
         githubConnection: process.env.CONNECTION_ARN || '',
-        region: process.env.REGION || 'ap-northeast-1'
+        region: process.env.REGION || 'ap-northeast-1',
+        infraRepo: process.env.INFRA_REPOSITORY || 'pitayapj/pitaya-cdk-template',
     }
 };
