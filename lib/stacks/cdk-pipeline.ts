@@ -27,6 +27,13 @@ export class CdkPipelineStack extends Stack {
       infraStatus: infraStatus,
     });
 
+    // Staging Environment
+    const stgStage = new AppStage(this, `cdk-pipeline-stage-stg`, {
+      env: {account: config.awsAccount, region: config.region},
+      deployEnv: 'stg',
+      infraStatus: 'on',
+    });
+
     // Production Environment
     const prodStage = new AppStage(this, `cdk-pipeline-stage-prod`, {
       env: {account: config.awsAccount, region: config.region},
@@ -57,6 +64,7 @@ export class CdkPipelineStack extends Stack {
 
     cdkPipeline.addStage(devStage);
 
+    cdkPipeline.addStage(stgStage);
 
     cdkPipeline.addStage(prodStage, {
       pre: [new cdkpipeline.ManualApprovalStep('production-deployment-approval')],

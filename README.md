@@ -8,14 +8,15 @@ Pitaya CDK template 😃 (in Typescript)
 - [Requirements](#requirements)
 - [Stacks structure](#stacks-structure)
 - [Files structure](#files-structure-and-its-meaning)
-- [Commands](#commands)
+- [Set up](#set-up)
+- [cdk diff](#cdk-diff)
 - [Future improvements](#future-improvements)
 
 ## Background
 
 I don't want to initiate a blank CDK project anymore. So this is what I created.
 
-🚨 Wrapped everything inside CDK Pipeline, will be teh default from now on. (README manual will be change later)
+🚨 Wrapped everything inside CDK Pipeline, will be the default from now on.
 
 ## Requirements
 
@@ -34,8 +35,9 @@ Of course a PC (I'm using MacOS, so installation guide gonna be for MacOS)
 
 ## Stacks structure
 
-The template include 3 major stacks, and will be (should be deploy in exact sequent):
+The template include 4 major stacks, and will be (should be deploy in exact sequent):
 
+- CDK Pipeline
 - Base Network
 - Stateful Resources
 - Stateless Resources
@@ -44,7 +46,7 @@ Optional stack:
 
 - Non Production
 
-This is just an example stack. In this stack I created automation to shut down resources temporary outside business hour (not meant to use in production)
+`Non Production` is just an example stack. In this stack I created automation to shut down resources temporary outside business hour (not meant to use in production)
 
 You can deploy Stateful or Stateless independently, but they will still be depended on BaseNetwork stack .<bR>
 In other word, BaseNetwork will be created no matter which stack you create first.
@@ -75,15 +77,16 @@ pitaya-cdk-template
 │   │   └── env-config.ts #load parameter from .env files below
 │   ├── stacks #stacks' definition folder
 │   │   ├── base-network.ts #BaseNetwork Stack
+│   │   ├── cdk-pipeline.ts #CDK Pipeline Stack
 │   │   ├── non-production.ts #Non Production Stack
 │   │   ├── stateful-resources.ts #Stateful Stack
 │   │   └── stateless-resources.ts #Stateless Stack
 │   └── stages #deployment stages folder
 │       └── app-stage.ts #application stage
-└── .env #parameters for CDK app
+└── .env.example #example parameters for CDK app
 ```
 
-## Commands
+## Set up
 
 ### Git clone and bootstrap cdk to your AWS account
 
@@ -92,16 +95,21 @@ pitaya-cdk-template
 git clone git@github.com:long2205/pitaya-cdk-template.git
 ```
 
-Register account ID (and default region) in lib/constants.ts
+- Register account ID, github connection and github repo name in `.env` file (you can create a copy from .env.example)
+- Also create a Secure String SSM parameter store named `/cdk/env`. Copy value from `.env` file to it.
 
 ```sh
 # Bootstrap to your AWS
 cdk bootstrap --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
 ```
 
-### Deploy stacks
+### Deploy everything! (although production need manual confirmation before deploy)
 
-Stacks will be deploy in sequential order.
+Since CDK Pipeline is wrapping around the whole infrastructure. Deploy everything for every environment with a single command:
+
+```sh
+cdk deploy CDKPipelineStack --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
+```
 
 **⚠️⚠️⚠️Please also keep in mind that this stack will be deploy in Tokyo Region as default⚠️⚠️⚠️**<br>
 Set different region in .env file if needed to.
@@ -110,41 +118,22 @@ A visualization of stack order for one stage and its dependency:
 
 ![stacks](/stacks.png)
 
-Deploy commands with development environment:
+## cdk diff
+
+We can still compare, check different of stacks before deployment:
 
 ```sh
-# Deploy every stacks of Development stage
-cdk deploy "dev/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
+# Ex
+# Check different in every stacks of Development stage
+cdk diff "CDKPipelineStack/cdk-pipeline-dev/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
 
-# Deploy specify Base Network stack
-cdk deploy dev/base-network --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
+# Check different in Base Network stack of Staging stage
+cdk diff "CDKPipelineStack/cdk-pipeline-stg/base-network" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
 
-# Deploy Stateless resources
-cdk deploy dev/stateless-resources --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
-# Stateless stack is depended on BaseNetwork Stack. Hence when deploy, it also deploys/check changes of BaseNetwork Stack. Same thing happen with Stateful Stack.
-```
-
-### Delete stacks
-
-Sometimes, you need to re-create stack. Or your business is gone and you need to delete it.
-
-Deleting stacks should be delete by later-most order.
-
-Which means the latest stack should be delete first, then the upmost BaseNetwork stack will be delete.
-
-```sh
-cdk destroy dev/stateless-resources --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
-
-cdk destroy dev/base-network --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
-# If you only run BaseNetwork delete command, all stacks will be delete, not just BaseNetwork stack
-
-# This command will delete everything in Development stage, latest stack to oldest.
-cdk destroy "dev/**" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
+# Check different in Stateless stack of Production stage
+cdk diff "CDKPipelineStack/cdk-pipeline-prod/stateless-resources" --profile 𝘺𝘰𝘶𝘳-𝘱𝘳𝘰𝘧𝘪𝘭𝘦-𝘯𝘢𝘮𝘦
 ```
 
 ## Future improvements
 
-- Wrapped all the stages into a [CDK Pipeline](https://docs.aws.amazon.com/cdk/v2/guide/cdk_pipeline.html#cdk_pipeline_stages)
-  Can be easily done now since you only need to add a stage into CDK pipeline.
-
-- Introduce [cdk-nag](https://github.com/cdklabs/cdk-nag)
+Create a website so you can check `cdk diff` before accept deployments.
