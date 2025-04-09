@@ -11,6 +11,7 @@ Pitaya CDK template 😃 (in Typescript)
 - [Set up](#set-up)
 - [cdk diff](#cdk-diff)
 - [Future improvements](#future-improvements)
+- [Others](#others)
 
 ## Background
 
@@ -137,3 +138,22 @@ cdk diff "CDKPipelineStack/cdk-pipeline-prod/stateless-resources" --profile 𝘺
 ## Future improvements
 
 Create a website so you can check `cdk diff` before accept deployments.
+
+## Others
+
+Update aws-cdk, its lib, others packages like dotenv and typescript.
+
+Check outdated packages:
+
+```sh
+npm outdated
+```
+
+Install latest:
+
+```sh
+npx ncu -u
+rm package-lock.json
+rm -Rf ./node_modules
+npm install
+```
