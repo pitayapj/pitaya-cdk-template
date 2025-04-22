@@ -160,6 +160,8 @@ export class StatelessResourceStack extends Stack {
         type: ecs.DeploymentControllerType.CODE_DEPLOY,
       },
       desiredCount: 0,
+      maxHealthyPercent: 200,
+      minHealthyPercent: 100,
       assignPublicIp: true, //if not set, task will be place in private subnet
     });
 
@@ -294,7 +296,10 @@ export class StatelessResourceStack extends Stack {
               "echo Logging in to Amazon ECR...",
               "aws --version",
               "$(aws ecr get-login --no-include-email --region $AWS_REGION)",
-              "COMMIT_ID=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -b -8)"
+              "COMMIT_ID=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -b -8)",
+              // Check change in model folder for migration
+              "CHANGED_FILES=$(git diff --name-only HEAD^ HEAD -- app/src/models)", //different for each framework
+              `export MIGRATION=$([ -n "$CHANGED_FILES" ] && echo true || echo false)`,
             ]
           },
           build: {
@@ -330,12 +335,58 @@ export class StatelessResourceStack extends Stack {
             "taskdef.json",
             "imageDetail.json"
           ]
+        },
+        // Inject git and export variable for migration step
+        env: {
+          "exported-variables": [
+            "MIGRATION"
+          ],
+          "git-credential-helper": "yes"
         }
       }),
       environment: {
-        buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_4,
+        buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_5,
         privileged: true,
       },
+    });
+
+    //Migration 
+    const runMigrationBuild = new codebuild.Project(this, "runMigrationBuild", {
+      projectName: `run-migration-${deployEnv}`,
+      environment: {
+        buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_5,
+        privileged: true,
+      },
+      role: codebuildRole,
+      vpc: vpc,
+      subnetSelection: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      buildSpec: codebuild.BuildSpec.fromObject({
+        version: "0.2",
+        phases: {
+          pre_build: {
+            commands: [
+              "echo Reading image URI from imageDetail.json...",
+              "IMAGE_URI=$(cat imageDetail.json | jq -r '.ImageURI')",
+              "echo Logging in to Amazon ECR...",
+              "AWS_ACCOUNT_ID=$(echo ${CODEBUILD_BUILD_ARN} | cut -f 5 -d :)",
+              "aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com",
+              `docker pull $IMAGE_URI`, // Pull image using URI from imageDetail.json
+            ]
+          },
+          build: {
+            commands: [
+              "echo Running migration...",
+              `docker run --rm --env-file <(env) $IMAGE_URI npm run migrate` // Replace with your migration command
+            ]
+          },
+        },
+      }),
+      environmentVariables: {
+        // DB_PORT: ssm.StringParameter.fromStringParameterAttributes(this, "port_value", { parameterName: `/${deployEnv}/db_port` }),
+        // DB_USERNAME: ssm.StringParameter.fromStringParameterAttributes(this, "username_value", { parameterName: `/${deployEnv}/db_username` }),
+        // DB_PASSWORD: ssm.StringParameter.fromStringParameterAttributes(this, "password_value", { parameterName: `/${deployEnv}/db_password` }),
+        // DB_DATABASE: ssm.StringParameter.fromStringParameterAttributes(this, "db_value", { parameterName: `/${deployEnv}/db_database` }),
+      }
     });
 
     //Deploy
@@ -365,6 +416,35 @@ export class StatelessResourceStack extends Stack {
               project: buildProjectApi,
               input: sourceOutputApi,
               outputs: [buildOutputApi]
+            }),
+          ],
+        },
+        {
+          stageName: "Migration",
+          beforeEntry: {
+            conditions: [
+              {
+                result: codepipeline.Result.SKIP,
+                rules: [
+                  new codepipeline.Rule({
+                    name: "Check_Migration",
+                    provider: "VariableCheck",
+                    version: "1",
+                    configuration: {
+                      Variable: "#{BuildImage.MIGRATION}",
+                      Value: "true",
+                      Operator: "EQ"
+                    },
+                  })
+                ],
+              }
+            ]
+          },
+          actions: [
+            new codepipeline_actions.CodeBuildAction({
+              actionName: "Run_Migration",
+              project: runMigrationBuild,
+              input: buildOutputApi, // Pass build output with imageDetail.json
             }),
           ],
         },
