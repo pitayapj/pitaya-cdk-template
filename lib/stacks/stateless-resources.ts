@@ -34,7 +34,7 @@ import * as path from 'path';
 
 
 interface StatelessResourceProps extends StackProps {
-  deployEnv: "dev" | "stg" |"prod",
+  deployEnv: "dev" | "stg" | "prod",
   vpc: ec2.Vpc;
   hostZone: route53.HostedZone;
 }
@@ -239,6 +239,7 @@ export class StatelessResourceStack extends Stack {
       priceClass: cloudfront.PriceClass.PRICE_CLASS_200, //include Japan but not all
       // Custom for Frontend Distribution
       // If frontend is a React SPA app hosting in S3, we will needed in including below code (to change behavior when user reload page)
+      // In case of when frontend's pages have .html in the end (Ex: using NextJS), we need to include cloudfront-fix.mjs in assets folder
       // errorResponses: [
       //   {
       //     httpStatus: 404,
